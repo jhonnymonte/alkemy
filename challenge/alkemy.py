@@ -10,7 +10,9 @@ import csv
 from datetime import datetime
 import time
 
-#%%
+# %%
+
+
 def create_folder(path):
     try:
         file_path = os.getcwd() + path
@@ -30,22 +32,22 @@ def create_folder(path):
 
 def fetch_venues(csv_url, type):
     ''' la funcion invoca a la funcion create folder y crea
-        
+
     '''
 
     with requests.Session() as s:
-        
+
         (time.time())
         date = time.strftime("%Y-%B", time.localtime(time.time()))
         folder = f"./{type}/{date}"
         create_folder(folder)
-        
+
         download = s.get(csv_url)
         decoded_content = download.content.decode('latin-1')
         cr = csv.reader(decoded_content.splitlines(), delimiter=',')
-        df = pd.DataFrame(cr)       
-        df.to_csv(f"{folder}/{type}-{datetime.today().strftime('%d-%m-%Y')}.csv")
-        
+        df = pd.DataFrame(cr)
+        df.to_csv(
+            f"{folder}/{type}-{datetime.today().strftime('%d-%m-%Y')}.csv",encoding="utf-8")
 
 
 # %%
@@ -63,10 +65,34 @@ if __name__ == '__main__':
 
 # %%
 import pandas as pd
-directorio='./bibliotecas/2021-December'
-archivo='bibliotecas-09-12-2021.csv'
-fname= os.path.join(directorio,archivo)
-df = pd.read_csv(fname,encoding='latin-1',header=1)
+directorio = './museos/2021-December'
+archivo = 'museos-10-12-2021.csv'
+fname = os.path.join(directorio, archivo)
+df = pd.read_csv(fname, encoding='utf-8', header=1)
+
+
+
+#%%
+def df_rename(data_frame):
+
+    data_frame.rename(
+        columns={"Cod_Loc": "cod_localidad",
+                 "IdProvincia": "id_provincia",
+                 "IdDepartamento":"id_departamento",
+                "Categoría":"categoría",
+                "Provincia":"provincia",
+                "Localidad":"localidad",
+                "Nombre":"nombre",
+                "Domicilio":"domicilio",
+                "CP":"código postal",
+                "Teléfono":"número de teléfono",
+                "Mail":"mail",
+                "Web":"web" },inplace=True)
+    return data_frame.head()
+    
+data_frame=df
+df_rename(data_frame)
+
 
 
 # %%
