@@ -29,52 +29,41 @@ def create_folder(path):
         print("Error al crear el nuevo directorio:" + msg)
 # %%
 
-
 def fetch_venues(csv_url, type):
-    ''' la funcion invoca a la funcion create folder y crea
+    ''' la funcion invoca a la funcion create folder y crea las subcarpetas, los archivos csv y los almacena en su carpera correspondiente con la fecha automatica
 
     '''
 
     with requests.Session() as s:
+        try:
+            (time.time())
+            date = time.strftime("%Y-%B", time.localtime(time.time()))
+            folder = f"./{type}/{date}"
+            create_folder(folder)
 
-        (time.time())
-        date = time.strftime("%Y-%B", time.localtime(time.time()))
-        folder = f"./{type}/{date}"
-        create_folder(folder)
+            download = s.get(csv_url)
+            decoded_content = download.content.decode('UTF-8')
+            cr = csv.reader(decoded_content.splitlines(), delimiter=',')
+            df = pd.DataFrame(cr)
+            df.to_csv(
+            f"{folder}/{type}-{datetime.today().strftime('%d-%m-%Y')}.csv")
+            #atrapo la excepcion de error de codificacion de archivo 
+        except UnicodeDecodeError :
+            
 
-        download = s.get(csv_url)
-        decoded_content = download.content.decode('latin-1')
-        cr = csv.reader(decoded_content.splitlines(), delimiter=',')
-        df = pd.DataFrame(cr)
-        df.to_csv(
-            f"{folder}/{type}-{datetime.today().strftime('%d-%m-%Y')}.csv",encoding="utf-8")
-
-
-# %%
-if __name__ == '__main__':
-
-    cines_url = ('https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/392ce1a8-ef11-4776-b280-6f1c7fae16ae/download/cine.csv')
-    museo_url = ('https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/4207def0-2ff7-41d5-9095-d42ae8207a5d/download/museos.csv')
-    bibliotecas_url = (
-        'https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/01c6c048-dbeb-44e0-8efa-6944f73715d7/download/biblioteca_popular.csv')
-
-    fetch_venues(cines_url, "cines")
-    fetch_venues(museo_url, 'museos')
-    fetch_venues(bibliotecas_url, 'bibliotecas')
-
-
-# %%
-import pandas as pd
-directorio = './museos/2021-December'
-archivo = 'museos-10-12-2021.csv'
-fname = os.path.join(directorio, archivo)
-df = pd.read_csv(fname, encoding='utf-8', header=1)
-
-
-
+            download = s.get(csv_url)
+            decoded_content = download.content.decode('latin-1')
+            cr = csv.reader(decoded_content.splitlines(), delimiter=',')
+            df = pd.DataFrame(cr)
+            df.to_csv(
+            f"{folder}/{type}-{datetime.today().strftime('%d-%m-%Y')}.csv")
+            
+            
+        
 #%%
-def df_rename(data_frame):
 
+def df_rename(data_frame):
+    
     data_frame.rename(
         columns={"Cod_Loc": "cod_localidad",
                  "IdProvincia": "id_provincia",
@@ -90,8 +79,31 @@ def df_rename(data_frame):
                 "Web":"web" },inplace=True)
     return data_frame.head()
     
+
+
+# %%
+if __name__ == '__main__':
+
+    cines_url = ('https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/392ce1a8-ef11-4776-b280-6f1c7fae16ae/download/cine.csv')
+    museo_url = ('https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/4207def0-2ff7-41d5-9095-d42ae8207a5d/download/museos.csv')
+    bibliotecas_url = ('https://datos.cultura.gob.ar/dataset/37305de4-3cce-4d4b-9d9a-fec3ca61d09f/resource/01c6c048-dbeb-44e0-8efa-6944f73715d7/download/biblioteca_popular.csv')
+
+    fetch_venues(cines_url, "cines")
+    fetch_venues(museo_url, 'museos')
+    fetch_venues(bibliotecas_url, 'bibliotecas')
+
+
+#%%
+import pandas as pd
+directorio = './bibliotecas/2021-December'
+archivo = 'bibliotecas-12-12-2021.csv'
+fname = os.path.join(directorio, archivo)
+df = pd.read_csv(fname, encoding='Utf-8', header=1)
+
+#%%
 data_frame=df
 df_rename(data_frame)
+
 
 
 
